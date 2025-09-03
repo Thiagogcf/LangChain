@@ -1,0 +1,8 @@
+langchain
+langchain-google-genai
+langchain-community
+langchain-postgres
+pypdf
+python-dotenv
+psycopg2-binary
+reportlab
