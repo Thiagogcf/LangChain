@@ -7,20 +7,16 @@ def main():
     
     while True:
         try:
-            # Solicitar pergunta do usuário
             pergunta = input("Faça sua pergunta:\n\nPERGUNTA: ").strip()
             
-            # Verificar se usuário quer sair
             if pergunta.lower() in ['sair', 'quit', 'exit', 'q']:
                 print("Encerrando chat...")
                 break
             
-            # Verificar se pergunta não está vazia
             if not pergunta:
                 print("Por favor, digite uma pergunta válida.")
                 continue
             
-            # Processar pergunta
             print("Processando...")
             resposta = search_prompt(pergunta)
             

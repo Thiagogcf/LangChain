@@ -19,12 +19,10 @@ OPENAI_EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL")
 def ingest_pdf():
     print("Iniciando ingestão do PDF...")
     
-    # Carregar PDF
     print(f"Carregando PDF: {PDF_PATH}")
     loader = PyPDFLoader(PDF_PATH)
     documents = loader.load()
     
-    # Dividir em chunks
     print("Dividindo documento em chunks...")
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
@@ -33,7 +31,6 @@ def ingest_pdf():
     chunks = text_splitter.split_documents(documents)
     print(f"Documento dividido em {len(chunks)} chunks")
     
-    # Determinar qual provedor usar - preferir Gemini se API key disponível
     use_gemini = GOOGLE_API_KEY and GOOGLE_API_KEY.strip()
     use_openai = OPENAI_API_KEY and OPENAI_API_KEY.strip()
     
@@ -41,7 +38,6 @@ def ingest_pdf():
         print("Erro: Nenhuma API key configurada (Google ou OpenAI)")
         return
         
-    # Configurar embeddings
     if use_gemini:
         try:
             print("Configurando embeddings Google Gemini...")
@@ -65,7 +61,6 @@ def ingest_pdf():
             openai_api_key=OPENAI_API_KEY
         )
     
-    # Definir nome da coleção baseado no provedor usado
     if use_gemini:
         collection_name = f"{PG_VECTOR_COLLECTION_NAME}_gemini"
         print("Usando coleção para embeddings Gemini...")
@@ -73,7 +68,6 @@ def ingest_pdf():
         collection_name = f"{PG_VECTOR_COLLECTION_NAME}_openai"  
         print("Usando coleção para embeddings OpenAI...")
     
-    # Configurar PGVector
     print("Conectando ao banco de dados...")
     vector_store = PGVector(
         embeddings=embeddings,
@@ -82,7 +76,6 @@ def ingest_pdf():
         use_jsonb=True,
     )
     
-    # Armazenar chunks no banco
     print("Armazenando embeddings no banco de dados...")
     vector_store.add_documents(chunks)
     

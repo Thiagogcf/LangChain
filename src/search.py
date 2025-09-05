@@ -14,7 +14,6 @@ GOOGLE_EMBEDDING_MODEL = os.getenv("GOOGLE_EMBEDDING_MODEL")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL")
 
-# Modelos fixos
 GOOGLE_LLM_MODEL = "gemini-2.5-flash-lite"
 OPENAI_LLM_MODEL = "gpt-5-nano"
 
@@ -50,7 +49,6 @@ def search_prompt(question=None):
         return None
         
     try:
-        # Determinar qual provedor usar - preferir Gemini se API key disponível
         use_gemini = GOOGLE_API_KEY and GOOGLE_API_KEY.strip()
         use_openai = OPENAI_API_KEY and OPENAI_API_KEY.strip()
         
@@ -58,7 +56,6 @@ def search_prompt(question=None):
             print("Erro: Nenhuma API key configurada (Google ou OpenAI)")
             return None
             
-        # Configurar embeddings
         if use_gemini:
             try:
                 embeddings = GoogleGenerativeAIEmbeddings(
@@ -81,13 +78,11 @@ def search_prompt(question=None):
                 openai_api_key=OPENAI_API_KEY
             )
         
-        # Definir nome da coleção baseado no provedor usado
         if use_gemini:
             collection_name = f"{PG_VECTOR_COLLECTION_NAME}_gemini"
         else:
             collection_name = f"{PG_VECTOR_COLLECTION_NAME}_openai"
         
-        # Conectar ao PGVector
         vector_store = PGVector(
             embeddings=embeddings,
             collection_name=collection_name,
@@ -95,16 +90,12 @@ def search_prompt(question=None):
             use_jsonb=True,
         )
         
-        # Buscar documentos relevantes
         docs_with_scores = vector_store.similarity_search_with_score(question, k=10)
         
-        # Concatenar contexto dos documentos encontrados
         contexto = "\n\n".join([doc.page_content for doc, score in docs_with_scores])
         
-        # Montar prompt completo
         prompt_completo = PROMPT_TEMPLATE.format(contexto=contexto, pergunta=question)
         
-        # Configurar LLM
         if use_gemini:
             try:
                 llm = ChatGoogleGenerativeAI(
@@ -129,7 +120,6 @@ def search_prompt(question=None):
                 temperature=0
             )
         
-        # Obter resposta
         response = llm.invoke([HumanMessage(content=prompt_completo)])
         
         return response.content
